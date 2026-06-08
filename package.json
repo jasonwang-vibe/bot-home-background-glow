@@ -1,0 +1,43 @@
+{
+  "name": "@vibe/gradient-glow",
+  "version": "0.1.0",
+  "description": "Organic flowing gradient-glow background as a React component (canvas, zero dependencies).",
+  "type": "module",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "vite",
+    "build": "tsc"
+  },
+  "peerDependencies": {
+    "react": ">=17",
+    "react-dom": ">=17"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.4.0"
+  },
+  "keywords": [
+    "react",
+    "canvas",
+    "gradient",
+    "background",
+    "animation",
+    "glow",
+    "vibe"
+  ],
+  "license": "UNLICENSED",
+  "private": true
+}
