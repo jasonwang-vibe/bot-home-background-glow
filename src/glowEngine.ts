@@ -21,7 +21,7 @@ export interface GlowConfig {
   enabled: boolean;
   /** `breath` (default) or `organic` drifting blobs. */
   mode: GlowMode;
-  /** Upper bound of the breathing glow intensity, 0..1. Default 0.6. */
+  /** Upper bound of the breathing glow intensity, 0..1. Default 0.9. */
   maxIntensity: number;
   /** Lower bound of the breathing glow intensity, 0..1. Default 0.25. */
   minIntensity: number;
@@ -53,6 +53,9 @@ interface BreathHalo {
   weight: number;
 }
 
+/** Slightly larger than web preview — the physical panel reads dimmer. */
+const BREATH_RADIUS_SCALE = 1.1;
+
 /** Midnight breath halo — deep indigo core, navy wash, soft violet fringe. */
 const MIDNIGHT_HALOS: BreathHalo[] = [
   { color: [38, 28, 98], r: 0.48, weight: 1.0 },
@@ -74,7 +77,7 @@ export const DEFAULT_PALETTE: RGB[] = BLOBS.map((b) => [...b.color] as RGB);
 export const DEFAULT_CONFIG: GlowConfig = {
   enabled: true,
   mode: "breath",
-  maxIntensity: 0.6,
+  maxIntensity: 0.9,
   minIntensity: 0.25,
   intensityCycleSec: 12,
   speed: 3.2,
@@ -221,11 +224,11 @@ export function createGradientGlow(
     const fy = H * cfg.focusY;
     const cx = W / 2;
     const cy = H / 2;
-    const spread = 0.96 + 0.08 * eased;
+    const spread = 1.0 + 0.12 * eased;
 
     ctx!.globalCompositeOperation = "screen";
     for (const h of MIDNIGHT_HALOS) {
-      const radius = R * h.r * spread;
+      const radius = R * h.r * spread * BREATH_RADIUS_SCALE;
       const g = ctx!.createRadialGradient(fx, fy, 0, fx, fy, radius);
       const [r, gr, bl] = h.color;
       const peak = 0.62 * intensity * h.weight;
@@ -233,7 +236,7 @@ export function createGradientGlow(
       const a = floor + (peak - floor) * eased;
       g.addColorStop(0, `rgba(${r},${gr},${bl},${a})`);
       g.addColorStop(0.28, `rgba(${r},${gr},${bl},${a * 0.55})`);
-      g.addColorStop(0.55, `rgba(${r},${gr},${bl},${a * 0.18})`);
+      g.addColorStop(0.55, `rgba(${r},${gr},${bl},${a * 0.24})`);
       g.addColorStop(1, `rgba(${r},${gr},${bl},0)`);
       ctx!.fillStyle = g;
       ctx!.beginPath();
@@ -241,7 +244,7 @@ export function createGradientGlow(
       ctx!.fill();
     }
 
-    drawVignette(cx, cy, 0.86);
+    drawVignette(cx, cy, 0.80);
   }
 
   function draw(t: number): void {

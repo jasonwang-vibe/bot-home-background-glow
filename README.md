@@ -67,7 +67,7 @@ export function HomeScreen() {
 ```
 
 No props needed — defaults match the Vibe Bot personal home (`mode: "breath"`,
-60% max / 25% min intensity, focus at avatar `368/480`).
+90% max / 25% min intensity, focus at avatar `368/480`).
 
 ### Sync with dot matrix
 
@@ -117,7 +117,7 @@ All props are optional.
 | ---- | ---- | ------- | ----------- |
 | `enabled` | `boolean` | `true` | Master on/off. When off, paints black. |
 | `mode` | `"breath" \| "organic"` | `"breath"` | Breath halo or drifting blobs. |
-| `maxIntensity` | `number` (0–1) | `0.6` | Upper bound of glow intensity. |
+| `maxIntensity` | `number` (0–1) | `0.9` | Upper bound of glow intensity. |
 | `minIntensity` | `number` (0–1) | `0.25` | Lower bound of glow intensity. |
 | `intensityCycleSec` | `number` | `12` | Min↔max cycle in seconds *(organic)*. |
 | `speed` | `number` | `3.2` | Drift-speed multiplier *(organic)*. |

@@ -14,7 +14,7 @@ export interface GradientGlowProps {
   enabled?: boolean;
   /** `breath` (default) or `organic` drifting blobs. */
   mode?: GlowMode;
-  /** Upper bound of the breathing glow intensity, 0..1. Default 0.6. */
+  /** Upper bound of the breathing glow intensity, 0..1. Default 0.9. */
   maxIntensity?: number;
   /** Lower bound of the breathing glow intensity, 0..1. Default 0.25. */
   minIntensity?: number;

@@ -8,7 +8,7 @@ import type { GlowMode } from "../src";
 export default function App() {
   const [enabled, setEnabled] = useState(true);
   const [mode, setMode] = useState<GlowMode>("breath");
-  const [maxIntensity, setMaxIntensity] = useState(0.6);
+  const [maxIntensity, setMaxIntensity] = useState(0.9);
   const [minIntensity, setMinIntensity] = useState(0.25);
   const [intensityCycleSec, setCycle] = useState(12);
   const [speed, setSpeed] = useState(3.2);
