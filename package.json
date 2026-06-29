@@ -1,7 +1,7 @@
 {
   "name": "@vibe/gradient-glow",
   "version": "0.1.0",
-  "description": "Organic flowing gradient-glow background as a React component (canvas, zero dependencies).",
+  "description": "Vibe Bot home-screen background glow — breath halo and organic gradient — as a React component (canvas, zero dependencies).",
   "type": "module",
   "main": "src/index.ts",
   "module": "src/index.ts",

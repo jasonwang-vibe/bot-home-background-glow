@@ -5,52 +5,52 @@ import {
   toRgb,
   type GlowConfig,
   type GlowController,
+  type GlowMode,
   type RGB,
 } from "./glowEngine";
 
 export interface GradientGlowProps {
   /** Master on/off. Default true. */
   enabled?: boolean;
-  /** Upper bound of the breathing intensity, 0..1. Default 0.6. */
+  /** `breath` (default) or `organic` drifting blobs. */
+  mode?: GlowMode;
+  /** Upper bound of the breathing glow intensity, 0..1. Default 0.6. */
   maxIntensity?: number;
-  /** Lower bound of the breathing intensity, 0..1. Default 0.25. */
+  /** Lower bound of the breathing glow intensity, 0..1. Default 0.25. */
   minIntensity?: number;
-  /** Seconds for one full min↔max intensity breath. Default 12. */
+  /** Seconds for one full min↔max intensity breath (organic mode). Default 12. */
   intensityCycleSec?: number;
-  /** Drift-speed multiplier. Default 3.2 (matches the prototype). */
+  /** Drift-speed multiplier (organic mode). Default 3.2. */
   speed?: number;
-  /** 0 = focused glow, 1 = fills the frame. Default 0. */
+  /** 0 = focused glow, 1 = fills the frame (organic mode). Default 0. */
   area?: number;
   /** Vertical focus of the glow, 0 (top) … 1 (bottom). Default ~0.767. */
   focusY?: number;
-  /** Glow colours — hex strings (`#2646b4`) or `[r,g,b]` triples. 1–5. */
+  /** Glow colours for organic mode — hex strings or `[r,g,b]` triples. */
   palette?: Array<string | RGB>;
+  /** Pulse with shared breath tempo (breath mode). Default true. */
+  breathSync?: boolean;
+  /** Breath-speed multiplier (breath mode). Default 1. */
+  breathSpeed?: number;
   /**
-   * Freeze the animation on a single static frame when the user has
-   * `prefers-reduced-motion: reduce`. Default true.
+   * External breath phase in radians — pass to sync with dot-matrix or avatar.
+   * When set, internal breath timing is overridden.
    */
+  breathPhase?: number | null;
+  /** Freeze on a static frame for `prefers-reduced-motion`. Default true. */
   respectReducedMotion?: boolean;
   className?: string;
   style?: React.CSSProperties;
-  /** Forwarded to the underlying <canvas> aria. Decorative by default. */
   ariaHidden?: boolean;
 }
 
 /**
- * Animated organic gradient-glow background, rendered to a <canvas> that fills
- * its parent. Drop it into any positioned container:
- *
- *   <div style={{ position: "relative" }}>
- *     <GradientGlow />
- *     <YourContent />
- *   </div>
- *
- * The canvas sizes itself to the container (ResizeObserver) and is crisp on
- * HiDPI displays. All props are live — changing them updates the animation in
- * place without remounting or restarting.
+ * Animated home-screen background glow, rendered to a <canvas> that fills its
+ * parent. Defaults to the midnight breath halo synced with the dot-matrix tempo.
  */
 export function GradientGlow({
   enabled = DEFAULT_CONFIG.enabled,
+  mode = DEFAULT_CONFIG.mode,
   maxIntensity = DEFAULT_CONFIG.maxIntensity,
   minIntensity = DEFAULT_CONFIG.minIntensity,
   intensityCycleSec = DEFAULT_CONFIG.intensityCycleSec,
@@ -58,6 +58,9 @@ export function GradientGlow({
   area = DEFAULT_CONFIG.area,
   focusY = DEFAULT_CONFIG.focusY,
   palette,
+  breathSync = DEFAULT_CONFIG.breathSync,
+  breathSpeed = DEFAULT_CONFIG.breathSpeed,
+  breathPhase = null,
   respectReducedMotion = true,
   className,
   style,
@@ -69,12 +72,10 @@ export function GradientGlow({
   const resolvedPalette: RGB[] | undefined = palette?.length
     ? palette.map(toRgb)
     : undefined;
-  // Stable dependency key so the effect below only reruns when colours change.
   const paletteKey = resolvedPalette
     ? resolvedPalette.map((c) => c.join(",")).join("|")
     : "";
 
-  // Create the controller + run the animation loop. Recreated only on mount.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -82,7 +83,6 @@ export function GradientGlow({
     const controller = createGradientGlow(canvas);
     controllerRef.current = controller;
 
-    // Keep the backing store matched to the element's box.
     const ro = new ResizeObserver(() => controller.resize());
     ro.observe(canvas);
 
@@ -96,7 +96,6 @@ export function GradientGlow({
 
     const loop = (t: number) => {
       controller.draw(t);
-      // When reduced motion is requested, draw one frame then stop.
       if (frozen) return;
       raf = requestAnimationFrame(loop);
     };
@@ -105,7 +104,7 @@ export function GradientGlow({
       frozen = !!(respectReducedMotion && mq?.matches);
       cancelAnimationFrame(raf);
       if (frozen) {
-        controller.draw(0); // a single representative static frame
+        controller.draw(0);
       } else {
         raf = requestAnimationFrame(loop);
       }
@@ -123,21 +122,30 @@ export function GradientGlow({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [respectReducedMotion]);
 
-  // Push prop changes into the live controller (no remount).
   useEffect(() => {
     const patch: Partial<GlowConfig> = {
       enabled,
+      mode,
       maxIntensity,
       minIntensity,
       intensityCycleSec,
       speed,
       area,
       focusY,
+      breathSync,
+      breathSpeed,
     };
     if (resolvedPalette) patch.palette = resolvedPalette;
     controllerRef.current?.update(patch);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, maxIntensity, minIntensity, intensityCycleSec, speed, area, focusY, paletteKey]);
+  }, [
+    enabled, mode, maxIntensity, minIntensity, intensityCycleSec,
+    speed, area, focusY, breathSync, breathSpeed, paletteKey,
+  ]);
+
+  useEffect(() => {
+    controllerRef.current?.setBreathPhase(breathPhase ?? null);
+  }, [breathPhase]);
 
   return (
     <canvas
